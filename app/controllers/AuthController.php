@@ -56,6 +56,6 @@ class AuthController
             header("Location: index.php?page=login&message=session_expired");
             exit();
         }
-        return true; // Sesi masih aktif
+        return true;
     }
 }

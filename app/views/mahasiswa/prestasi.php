@@ -26,7 +26,7 @@ $prestasiList = $prestasiController->showPrestasi($id_mahasiswa);
                         <td><?php echo htmlspecialchars($prestasi['judul_kompetisi']); ?></td>
                         <td><?php echo htmlspecialchars($prestasi['tingkat_kompetisi']); ?></td>
                         <td><?php echo htmlspecialchars($prestasi['tempat_kompetisi']); ?></td>
-                        <td><?php echo htmlspecialchars($prestasi['tgl_pengajuan']->format('Y-m-d')); ?></td>
+
                         <td>
                             <a href="update_prestasi.php?id=<?php echo $prestasi['id_prestasi']; ?>" class="btn btn-update">Update</a>
                             <a href="delete_prestasi.php?id=<?php echo $prestasi['id_prestasi']; ?>" class="btn btn-delete" onclick="return confirm('Apakah Anda yakin ingin menghapus prestasi ini?');">Delete</a>

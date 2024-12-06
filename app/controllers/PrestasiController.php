@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/../models/PrestasiModel.php';
 
 class PrestasiController
@@ -9,11 +10,60 @@ class PrestasiController
     {
         $this->prestasiModel = new PrestasiModel($conn);
     }
-
-    public function showPrestasi($id_mahasiswa)
+    public function getMahasiswaList()
     {
-        // Ambil daftar prestasi berdasarkan id mahasiswa
-        return $this->prestasiModel->getPrestasiByMahasiswa($id_mahasiswa);
+        return $this->prestasiModel->getAllMahasiswa();
+    }
+
+    public function getDosenList()
+    {
+        return $this->prestasiModel->getAllDosen();
+    }
+
+    public function showPrestasiDetail($id_prestasi)
+    {
+        $prestasi = $this->prestasiModel->getPrestasiById($id_prestasi);
+        include '../app/views/dosen/dosen_prestasi_detail.php';
+    }
+
+    public function addPrestasi($data_prestasi, $mahasiswa_ids, $dosen_ids)
+    {
+        $isInserted = $this->prestasiModel->addPrestasi($data_prestasi, $mahasiswa_ids, $dosen_ids);
+
+        if ($isInserted) {
+            $_SESSION['flash_message'] = [
+                'type' => 'success',
+                'message' => 'Prestasi berhasil ditambahkan!'
+            ];
+            header("Location: http://localhost/sipresma/public/index.php?page=dosen_prestasi");
+            exit;
+        } else {
+            $_SESSION['flash_message'] = [
+                'type' => 'danger',
+                'message' => 'Gagal menambahkan prestasi.'
+            ];
+            header("Location: http://localhost/sipresma/public/index.php?page=dosen_prestasi");
+            exit;
+        }
+    }
+    public function deletePrestasi($id_prestasi)
+    {
+        $isDeleted = $this->prestasiModel->deletePrestasi($id_prestasi);
+
+        if ($isDeleted) {
+            $_SESSION['flash_message'] = [
+                'type' => 'success',
+                'message' => 'Prestasi berhasil dihapus!'
+            ];
+        } else {
+            $_SESSION['flash_message'] = [
+                'type' => 'danger',
+                'message' => 'Gagal menghapus prestasi.'
+            ];
+        }
+
+        header("Location: http://localhost/sipresma/public/index.php?page=dosen_prestasi");
+        exit;
     }
 
     public function showAllPrestasi()
@@ -21,42 +71,48 @@ class PrestasiController
         return $this->prestasiModel->getAllPrestasi();
     }
 
-    public function getPrestasiDetail($id_prestasi)
+    public function editPrestasi($id_prestasi, $data_prestasi, $mahasiswa_ids, $dosen_ids)
     {
-        // Mengambil detail prestasi
-        $prestasi = $this->prestasiModel->getPrestasiById($id_prestasi);
-        if ($prestasi) {
-            $alasanPenolakan = $this->prestasiModel->getAlasanPenolakan($id_prestasi);
+        $isUpdated = $this->prestasiModel->editPrestasi($id_prestasi, $data_prestasi, $mahasiswa_ids, $dosen_ids);
 
-            include '../app/views/dosen/dosen_prestasi_detail.php';
+        if ($isUpdated) {
+            $_SESSION['flash_message'] = [
+                'type' => 'success',
+                'message' => 'Prestasi berhasil diperbarui!'
+            ];
+            header("Location: http://localhost/sipresma/public/index.php?page=dosen_prestasi");
+            exit;
         } else {
-            echo "Prestasi tidak ditemukan.";
+            $_SESSION['flash_message'] = [
+                'type' => 'danger',
+                'message' => 'Gagal memperbarui prestasi.'
+            ];
+            header("Location: http://localhost/sipresma/public/index.php?page=dosen_prestasi");
+            exit;
         }
     }
 
     public function setujuiPrestasi($id_prestasi)
     {
         if ($this->prestasiModel->updateStatusPrestasi($id_prestasi, 'disetujui')) {
-            $_SESSION['flash_message'] = 'Data telah disetujui';
-            header("Location: http://localhost/sipresma/public/index.php?page=dosen_prestasi_detail&id_prestasi=" . $id_prestasi);
+            $this->prestasiModel->insertHistoryApproval($id_prestasi, 'disetujui');
+            $_SESSION['flash_message'] = 'Prestasi telah disetujui.';
+            header("Location: ?page=dosen_prestasi_detail&id_prestasi=" . $id_prestasi);
             exit();
+        } else {
+            echo "Gagal menyetujui prestasi.";
         }
     }
 
-    public function tolakPrestasi($id_prestasi)
+    public function tolakPrestasi($id_prestasi, $alasan)
     {
-        if (isset($_POST['alasan']) && !empty($_POST['alasan'])) {
-            $alasan = $_POST['alasan'];
-
-            if ($this->prestasiModel->tolakPrestasi($id_prestasi, $alasan)) {
-                $_SESSION['flash_message'] = 'Prestasi telah ditolak';
-                header("Location: http://localhost/sipresma/public/index.php?page=dosen_prestasi_detail&id_prestasi=" . $id_prestasi);
-                exit();
-            }
-        } else {
-            $_SESSION['flash_message'] = 'Alasan penolakan tidak boleh kosong!';
-            header("Location: http://localhost/sipresma/public/index.php?page=dosen_prestasi_detail&id_prestasi=" . $id_prestasi);
+        if ($this->prestasiModel->updateStatusPrestasi($id_prestasi, 'ditolak')) {
+            $this->prestasiModel->insertHistoryApproval($id_prestasi, 'ditolak', $alasan);
+            $_SESSION['flash_message'] = 'Prestasi telah ditolak.';
+            header("Location: ?page=dosen_prestasi_detail&id_prestasi=" . $id_prestasi);
             exit();
+        } else {
+            echo "Gagal menolak prestasi.";
         }
     }
 }

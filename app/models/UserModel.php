@@ -11,7 +11,7 @@ class UserModel
 
     public function validateLogin($username, $password)
     {
-        $sqlMahasiswa = "SELECT id_mahasiswa, NIM, nama_mahasiswa FROM mahasiswa WHERE NIM = ? AND password_mahasiswa = ?";
+        $sqlMahasiswa = "SELECT * FROM mahasiswa WHERE NIM = ? AND password_mahasiswa = ?";
         $stmt = $this->conn->prepare($sqlMahasiswa);
         $stmt->execute([$username, $password]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);

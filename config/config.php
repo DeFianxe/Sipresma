@@ -1,12 +1,12 @@
 <?php
 $host = 'localhost';
 $dbname = 'sipresma';
-$username = 'sa'; 
-$password = 'siwof'; 
+$username = 'sa';
+$password = 'siwof';
 
 try {
-    $conn = new PDO("sqlsrv:Server=$host;Database=$dbname", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Adding UTF-8 encoding to the connection string
+    $conn = new PDO("sqlsrv:Server=$host;Database=$dbname", $username, $password,);
 } catch (PDOException $e) {
     echo "Koneksi gagal: " . $e->getMessage();
     die();
